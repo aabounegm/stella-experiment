@@ -1,0 +1,15 @@
+{
+    "projectName": "Stella",
+    "languages": [{
+        "id": "stella",
+        "grammar": "src/language/stella.langium",
+        "fileExtensions": [".stella"],
+        "textMate": {
+            "out": "syntaxes/stella.tmLanguage.json"
+        },
+        "monarch": {
+            "out": "src/syntaxes/stella.monarch.ts"
+        }
+    }],
+    "out": "src/language/generated"
+}
