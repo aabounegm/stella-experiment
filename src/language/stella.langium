@@ -61,10 +61,6 @@ DeclExceptionVariant:
 
 // Expressions
 
-DotRecord:
-    expr=Expr '.' label=ID;
-DotTuple:
-    expr=Expr '.' index=INT;
 ConstTrue:
     {infer ConstTrue} 'true';
 ConstFalse:
@@ -83,6 +79,8 @@ Throw:
     'throw' '(' expr=Expr ')';
 TryCatch:
     'try' '{' tryExpr=Expr '}' 'catch' '{' pat=Pattern '=>' fallbackExpr=Expr '}';
+TryCastAs:
+    'try' '{' tryExpr=Expr '}' 'cast' 'as' type=Type '{' pat=Pattern '=>' expr=Expr '}' 'with' '{' fallbackExpr=Expr '}';
 TryWith:
     'try' '{' tryExpr=Expr '}' 'with' '{' fallbackExpr=Expr '}';
 Inl:
@@ -113,30 +111,14 @@ Fold:
     'fold' '[' type=Type ']' expr=Expr;
 Unfold:
     'unfold' '[' type=Type ']' expr=Expr;
-Application:
-    fun=Expr '(' (args+=Expr (',' args+=Expr)*)? ')';
-TypeApplication:
-    fun=Expr '[' (types+=Type (',' types+=Type)*) ']';
-Multiply:
-    left=Expr '*' right=Expr;
-Divide:
-    left=Expr '/' right=Expr;
-LogicAnd:
-    left=Expr 'and' right=Expr;
 Ref:
     'new' expr=Expr;
 Deref:
     '*' expr=Expr;
-Add:
-    left=Expr '+' right=Expr;
-Subtract:
-    left=Expr '-' right=Expr;
-LogicOr:
-    left=Expr 'or' right=Expr;
-TypeAsc:
-    expr=Expr 'as' type=Type;
-TypeCast:
-    expr=Expr 'cast' 'as' type=Type;
+Abstraction:
+    'fn' '(' (paramDecls+=ParamDecl (',' paramDecls+=ParamDecl)*)? ')'
+    '{' 'return' returnExpr=Expr '}'
+;
 Tuple:
     '{' (exprs+=Expr (',' exprs+=Expr)*)? '}';
 Record:
@@ -145,26 +127,12 @@ Variant:
     '<|' label=ID ('=' rhs=Expr)? '|>';
 Match:
     'match' expr=Expr '{' (cases+=MatchCase ('|' cases+=MatchCase)*)? '}';
+MatchCase:
+    pattern=Pattern '=>' expr=Expr;
 List:
     '[' (exprs+=Expr (',' exprs+=Expr)*)? ']';
-LessThan:
-    left=Expr '<' right=Expr;
-LessThanOrEqual:
-    left=Expr '<=' right=Expr;
-GreaterThan:
-    left=Expr '>' right=Expr;
-GreaterThanOrEqual:
-    left=Expr '>=' right=Expr;
-Equal:
-    left=Expr '==' right=Expr;
-NotEqual:
-    left=Expr '!=' right=Expr;
-Assign:
-    lhs=Expr ':=' rhs=Expr;
 If:
     'if' condition=Expr 'then' thenExpr=Expr 'else' elseExpr=Expr;
-Sequence:
-    expr1=Expr ';' expr2=Expr;
 Let:
     'let' patternBindings+=PatternBinding (',' patternBindings+=PatternBinding)* 'in' body=Expr;
 LetRec:
@@ -174,86 +142,172 @@ TypeAbstraction:
 ParenthesisedExpr:
     '(' expr=Expr ')';
 
+// Left-recursive expressions
+
 Expr:
-    (DotRecord
-    | DotTuple
-    | ConstTrue
-    | ConstFalse
-    | ConstUnit
-    | ConstInt
-    | ConstMemory
-    | Var
-    | Panic
-    | Throw
-    | TryCatch
-    | TryWith
-    | Inl
-    | Inr
-    | ConsList
-    | Head
-    | IsEmpty
-    | Tail
-    | Succ
-    | LogicNot
-    | Pred
-    | IsZero
-    | Fix
-    | NatRec
-    | Fold
-    | Unfold
-    | Application
-    | TypeApplication
-    | Multiply
-    | Divide
-    | LogicAnd
-    | Ref
-    | Deref
-    | Add
-    | Subtract
-    | LogicOr
-    | TypeAsc
-    | TypeCast
-    | Tuple
-    | Record
-    | Variant
-    | Match
-    | List
-    | LessThan
-    | LessThanOrEqual
-    | GreaterThan
-    | GreaterThanOrEqual
-    | Equal
-    | NotEqual
-    | Assign
-    | If
-    | Sequence
-    | Let
-    | LetRec
-    | TypeAbstraction
-    | ParenthesisedExpr) ';'?
+    Sequence
 ;
 
+Sequence infers Expr:
+    Assign ({infer Sequence.expr1=current} ';' expr2=Assign)*
+;
+
+Assign infers Expr:
+    Equal ({infer Assign.left=current} ':=' right=Equal)*
+;
+
+Equal infers Expr:
+    NotEqual ({infer Equal.left=current} '==' right=NotEqual)*
+;
+NotEqual infers Expr:
+    LessThan ({infer NotEqual.left=current} '!=' right=LessThan)*
+;
+
+LessThan infers Expr:
+    LessThanOrEqual ({infer LessThan.left=current} '<' right=LessThanOrEqual)*
+;
+
+LessThanOrEqual infers Expr:
+    GreaterThan ({infer LessThanOrEqual.left=current} '<=' right=GreaterThan)*
+;
+GreaterThan infers Expr:
+    GreaterThanOrEqual ({infer GreaterThan.left=current} '>' right=GreaterThanOrEqual)*
+;
+GreaterThanOrEqual infers Expr:
+    TypeCast ({infer GreaterThanOrEqual.left=current} '>=' right=TypeCast)*
+;
+
+TypeCast infers Expr:
+    TypeAsc ({infer TypeCast.expr=current} 'cast' 'as' type=Type)*
+;
+
+TypeAsc infers Expr:
+    LogicAnd ({infer TypeAsc.expr=current} 'as' type=Type)*
+;
+
+LogicAnd infers Expr:
+    LogicOr ({infer LogicAnd.left=current} 'and' right=LogicOr)*
+;
+
+LogicOr infers Expr:
+    Subtract ({infer LogicOr.left=current} 'or' right=Subtract)*
+;
+
+Subtract infers Expr:
+    Add ({infer Subtraction.left=current} '-' right=Add)*
+;
+
+Add infers Expr:
+    Multiply ({infer Add.left=current} '+' right=Multiply)*
+;
+
+Multiply infers Expr:
+    Divide ({infer Multiply.left=current} '*' right=Divide)*
+;
+
+Divide infers Expr:
+    TypeApplication ({infer Divide.left=current} '/' right=TypeApplication)*
+;
+
+TypeApplication infers Expr:
+    Application ({infer TypeApplication.fun=current} '[' (types+=Type (',' types+=Type)*) ']')*
+;
+
+Application infers Expr:
+    DotSomething ({infer Application.fun=current} '(' (args+=Expr (',' args+=Expr)*)? ')')*
+;
+
+DotSomething infers Expr:
+    Primary (
+        '.'
+            ({infer DotRecord.expr=current} label=ID
+            | {infer DotTuple.expr=current} index=INT)
+    )*
+;
+
+/** Non-left-recursive expressions */
+Primary infers Expr:
+    (
+        ConstTrue
+        | ConstFalse
+        | ConstUnit
+        | ConstInt
+        | ConstMemory
+        | Var
+        | Panic
+        | Throw
+        | TryCatch
+        | TryCastAs
+        | TryWith
+        | Inl
+        | Inr
+        | ConsList
+        | Head
+        | IsEmpty
+        | Tail
+        | Succ
+        | LogicNot
+        | Pred
+        | IsZero
+        | Fix
+        | NatRec
+        | Fold
+        | Unfold
+        | Ref
+        | Deref
+        | Abstraction
+        | Tuple
+        | Record
+        | Variant
+        | Match
+        | List
+        | If
+        | Let
+        | LetRec
+        | TypeAbstraction
+        | ParenthesisedExpr
+    ) ';'?
+;
+
+
 // Patterns
+
+Pattern:
+    PatternCastAs
+;
+
+PatternCastAs infers Pattern:
+    PatternAsc ({infer PatternCastAs.pattern=current} 'cast' 'as' type=Type)*
+;
+
+PatternAsc infers Pattern:
+    PrimaryPattern ({infer PatternAsc.pattern=current} 'as' type=Type)*
+;
 
 PatternBinding:
     pattern=Pattern '=' rhs=Expr;
 
 Binding:
     name=ID '=' rhs=Expr;
-
-MatchCase:
-    pattern=Pattern '=>' expr=Expr;
-
 PatternVariant:
     '<|' label=ID ('=' pattern=Pattern)? '|>';
 PatternInl:
     'inl' '(' pattern=Pattern ')';
 PatternInr:
     'inr' '(' pattern=Pattern ')';
-PatternTuple:
-    '{' (patterns+=Pattern (',' patterns+=Pattern)*)? '}';
-PatternRecord:
-    '{' (patterns+=LabelledPattern (',' patterns+=LabelledPattern)*)? '}';
+PatternTupleOrRecord infers PrimaryPattern:
+    '{' (
+        ({infer PatternTuple} patterns+=Pattern (',' patterns+=Pattern)*)
+        | ({infer PatternRecord} patterns+=LabelledPattern (',' patterns+=LabelledPattern)*)
+    ) '}'
+;
+
+// PatternTuple infers Pattern;
+
+// PatternTuple:
+//     '{' (patterns+=Pattern (',' patterns+=Pattern)*)? '}';
+// PatternRecord:
+//     '{' (patterns+=LabelledPattern (',' patterns+=LabelledPattern)*)? '}';
 PatternList:
     '[' (patterns+=Pattern (',' patterns+=Pattern)*)? ']';
 PatternCons:
@@ -270,19 +324,17 @@ PatternSucc:
     'succ' '(' pattern=Pattern ')';
 PatternVar:
     name=ID;
-PatternAsc:
-    pattern=Pattern 'as' type=Type;
-PatternCastAs:
-    pattern=Pattern 'cast' 'as' type=Type;
 ParenthesisedPattern:
     '(' pattern=Pattern ')';
 
-Pattern:
+/** Patterns without left-recursion */
+PrimaryPattern:
     PatternVariant
     | PatternInl
     | PatternInr
-    | PatternTuple
-    | PatternRecord
+    // | PatternTuple
+    // | PatternRecord
+    | PatternTupleOrRecord
     | PatternList
     | PatternCons
     | PatternFalse
@@ -291,8 +343,8 @@ Pattern:
     | PatternInt
     | PatternSucc
     | PatternVar
-    | PatternAsc
-    | PatternCastAs
+    // | PatternAsc
+    // | PatternCastAs
     | ParenthesisedPattern;
 
 LabelledPattern:
@@ -300,14 +352,20 @@ LabelledPattern:
 
 // Types
 
+Type:
+    TypeSum
+;
+
+TypeSum:
+    PrimaryType ({infer TypeSum.left=current} '+' right=PrimaryType)*
+;
+
 TypeBool:
     {infer TypeBool} 'Bool';
 TypeNat:
     {infer TypeNat} 'Nat';
 TypeRef:
     '&' type=Type;
-TypeSum:
-    left=Type '+' right=Type;
 TypeFun:
     'fn' '(' (paramTypes+=Type (',' paramTypes+=Type)*)? ')' '->' returnType=Type;
 TypeForAll:
@@ -318,8 +376,12 @@ TypeTuple:
     '{' (types+=Type (',' types+=Type)*)? '}';
 TypeRecord:
     '{' fieldTypes+=RecordFieldType (',' fieldTypes+=RecordFieldType)* '}';
+RecordFieldType:
+    label=ID ':' type=Type;
 TypeVariant:
     '<|' (fieldTypes+=VariantFieldType (',' fieldTypes+=VariantFieldType)*)? '|>';
+VariantFieldType:
+    label=ID (':' type=Type)?;
 TypeList:
     '[' type=Type ']';
 TypeUnit:
@@ -335,11 +397,11 @@ TypeVar:
 TypeParens:
     '(' type=Type ')';
 
-Type:
+/** Types without left-recursion */
+PrimaryType:
     TypeBool
     | TypeNat
     | TypeRef
-    | TypeSum
     | TypeFun
     | TypeForAll
     | TypeRec
@@ -354,10 +416,6 @@ Type:
     | TypeVar
     | TypeParens;
 
-RecordFieldType:
-    label=ID ':' type=Type;
-VariantFieldType:
-    label=ID (':' type=Type)?;
 
 hidden terminal WS: /\s+/;
 terminal ID: /[_a-zA-Z][!\-:?\w]*/;
