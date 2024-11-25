@@ -1,7 +1,11 @@
-import { EmptyFileSystem } from 'langium';
-import { startLanguageServer } from 'langium/lsp';
-import { BrowserMessageReader, BrowserMessageWriter, createConnection } from 'vscode-languageserver/browser.js';
-import { createStellaServices } from './stella-module.js';
+import { EmptyFileSystem } from "langium";
+import { startLanguageServer } from "langium/lsp";
+import {
+  BrowserMessageReader,
+  BrowserMessageWriter,
+  createConnection,
+} from "vscode-languageserver/browser.js";
+import { createStellaServices } from "./stella-module.js";
 
 declare const self: DedicatedWorkerGlobalScope;
 
