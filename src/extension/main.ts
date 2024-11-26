@@ -20,6 +20,9 @@ export function activate(context: vscode.ExtensionContext): void {
       treeProvider.refresh();
     }
   });
+  vscode.commands.registerCommand("stella.refreshSyntaxTree", () => {
+    treeProvider.refresh();
+  });
 }
 
 // This function is called when the extension is deactivated.

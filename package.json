@@ -83,6 +83,22 @@
         }
       ]
     },
+    "menus": {
+      "view/title": [
+        {
+          "command": "stella.refreshSyntaxTree",
+          "group": "navigation",
+          "when": "view == syntaxTree"
+        }
+      ]
+    },
+    "commands": [
+      {
+        "command": "stella.refreshSyntaxTree",
+        "title": "Refresh Syntax Tree",
+        "icon": "$(refresh)"
+      }
+    ],
     "languages": [
       {
         "id": "stella",
