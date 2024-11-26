@@ -295,19 +295,11 @@ PatternInl:
     'inl' '(' pattern=Pattern ')';
 PatternInr:
     'inr' '(' pattern=Pattern ')';
-PatternTupleOrRecord infers PrimaryPattern:
-    '{' (
-        ({infer PatternTuple} patterns+=Pattern (',' patterns+=Pattern)*)
-        | ({infer PatternRecord} patterns+=LabelledPattern (',' patterns+=LabelledPattern)*)
-    ) '}'
-;
 
-// PatternTuple infers Pattern;
-
-// PatternTuple:
-//     '{' (patterns+=Pattern (',' patterns+=Pattern)*)? '}';
-// PatternRecord:
-//     '{' (patterns+=LabelledPattern (',' patterns+=LabelledPattern)*)? '}';
+PatternTuple:
+    '{' (patterns+=Pattern (',' patterns+=Pattern)*)? '}';
+PatternRecord:
+    '{' (patterns+=LabelledPattern (',' patterns+=LabelledPattern)*)? '}';
 PatternList:
     '[' (patterns+=Pattern (',' patterns+=Pattern)*)? ']';
 PatternCons:
@@ -328,13 +320,12 @@ ParenthesisedPattern:
     '(' pattern=Pattern ')';
 
 /** Patterns without left-recursion */
-PrimaryPattern:
+PrimaryPattern infers Pattern:
     PatternVariant
     | PatternInl
     | PatternInr
-    // | PatternTuple
-    // | PatternRecord
-    | PatternTupleOrRecord
+    | PatternTuple
+    | PatternRecord
     | PatternList
     | PatternCons
     | PatternFalse
@@ -343,8 +334,6 @@ PrimaryPattern:
     | PatternInt
     | PatternSucc
     | PatternVar
-    // | PatternAsc
-    // | PatternCastAs
     | ParenthesisedPattern;
 
 LabelledPattern:
