@@ -210,19 +210,18 @@ Divide infers Expr:
 ;
 
 DotSomething infers Expr:
-    Application (
+    FuncApplication (
         '.'
             ({infer DotRecord.expr=current} label=ID
             | {infer DotTuple.expr=current} index=INT)
     )*
 ;
 
-Application infers Expr:
-    TypeApplication ({infer Application.fun=current} '(' (args+=Expr (',' args+=Expr)*)? ')')*
-;
-
-TypeApplication infers Expr:
-    Primary ({infer TypeApplication.fun=current} '[' (types+=Type (',' types+=Type)*) ']')*
+FuncApplication infers Expr:
+    Primary (
+          ({infer Application.fun=current} '(' (args+=Expr (',' args+=Expr)*)? ')')
+        | ({infer TypeApplication.fun=current} '[' (types+=Type (',' types+=Type)*) ']')
+    )*
 ;
 
 
