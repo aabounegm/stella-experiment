@@ -112,7 +112,7 @@ Fold:
 Unfold:
     'unfold' '[' type=Type ']' expr=Expr;
 Ref:
-    'new' expr=Expr;
+    'new' '(' expr=Expr ')';
 Deref:
     '*' expr=Expr;
 Abstraction:
