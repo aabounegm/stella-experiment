@@ -149,7 +149,10 @@ Expr:
 ;
 
 Sequence infers Expr:
-    Assign ({infer Sequence.expr1=current} ';' expr2=Assign)*
+    Assign (
+          {infer Sequence.expr1=current} ';' expr2=Assign
+        | ';'
+    )*
 ;
 
 Assign infers Expr:
@@ -262,7 +265,7 @@ Primary infers Expr:
         | LetRec
         | TypeAbstraction
         | ParenthesisedExpr
-    ) ';'?
+    )
 ;
 
 
