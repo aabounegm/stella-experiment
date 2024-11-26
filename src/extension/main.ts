@@ -2,15 +2,24 @@ import type {
   LanguageClientOptions,
   ServerOptions,
 } from "vscode-languageclient/node.js";
-import type * as vscode from "vscode";
+import * as vscode from "vscode";
 import * as path from "node:path";
 import { LanguageClient, TransportKind } from "vscode-languageclient/node.js";
+import { SyntaxTreeProvider } from "./syntax-tree.js";
 
 let client: LanguageClient;
 
 // This function is called when the extension is activated.
 export function activate(context: vscode.ExtensionContext): void {
   client = startLanguageClient(context);
+
+  const treeProvider = new SyntaxTreeProvider(client);
+  vscode.window.registerTreeDataProvider("syntaxTree", treeProvider);
+  vscode.window.onDidChangeActiveTextEditor((editor) => {
+    if (editor?.document.languageId === "stella") {
+      treeProvider.refresh();
+    }
+  });
 }
 
 // This function is called when the extension is deactivated.

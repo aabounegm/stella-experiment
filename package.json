@@ -65,6 +65,24 @@
     "Programming Languages"
   ],
   "contributes": {
+    "views": {
+      "stellaView": [
+        {
+          "id": "syntaxTree",
+          "name": "Syntax Tree",
+          "when": "resourceLangId == stella"
+        }
+      ]
+    },
+    "viewsContainers": {
+      "activitybar": [
+        {
+          "id": "stellaView",
+          "title": "Stella",
+          "icon": "./images/stella.png"
+        }
+      ]
+    },
     "languages": [
       {
         "id": "stella",
