@@ -1,7 +1,7 @@
 grammar Stella
 
 entry Program:
-    LanguageDecl
+    langDecl=LanguageDecl
     extensions+=Extension*
     decls+=Decl*
 ;
