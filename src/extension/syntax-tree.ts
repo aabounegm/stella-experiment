@@ -88,15 +88,28 @@ export class SyntaxTreeProvider implements vscode.TreeDataProvider<Element> {
   }
 
   getTreeItem(element: Element): vscode.TreeItem {
+    const typeIcons: Record<string, string> = {
+      bigint: "symbol-number",
+      number: "symbol-number",
+      string: "symbol-text",
+      boolean: "symbol-boolean",
+      object: "calendar", // Date is the only object treated by Langium as a terminal token
+    };
+
     if (isLangiumPrimitive(element)) {
-      return { label: element.toString() };
+      return {
+        label: element.toString(),
+        iconPath: new vscode.ThemeIcon(
+          typeIcons[typeof element] ?? "symbol-property"
+        ),
+      };
     }
     if (isNode(element)) {
-      // TODO: icon for a node
       const isEmpty = Object.keys(element).length === 2; // `2` because of $type and $textRegion
       return {
         label: element.$type,
         description: isEmpty ? "= {}" : undefined,
+        iconPath: new vscode.ThemeIcon("symbol-struct"),
         collapsibleState: isEmpty
           ? vscode.TreeItemCollapsibleState.None
           : vscode.TreeItemCollapsibleState.Collapsed,
@@ -107,16 +120,22 @@ export class SyntaxTreeProvider implements vscode.TreeDataProvider<Element> {
       return { label: "Error!" };
     }
 
-    // TODO: icon for a node property for all the next
     const { key, value } = element;
     if (isLangiumPrimitive(value)) {
-      return { label: key, description: `= ${value}` };
+      return {
+        label: key,
+        description: `= ${value}`,
+        iconPath: new vscode.ThemeIcon(
+          typeIcons[typeof value] ?? "symbol-property"
+        ),
+      };
     }
     if (Array.isArray(value)) {
       const isEmpty = value.length === 0;
       return {
         label: key,
         description: isEmpty ? "= []" : undefined,
+        iconPath: new vscode.ThemeIcon("symbol-array"),
         collapsibleState: isEmpty
           ? vscode.TreeItemCollapsibleState.None
           : vscode.TreeItemCollapsibleState.Collapsed,
@@ -126,12 +145,14 @@ export class SyntaxTreeProvider implements vscode.TreeDataProvider<Element> {
     if ("$ref" in value) {
       return {
         label: key,
+        iconPath: new vscode.ThemeIcon("symbol-reference"),
         description: `Ref<${value.$refText}>`,
       };
     }
 
     return {
       label: key,
+      iconPath: new vscode.ThemeIcon("symbol-property"),
       collapsibleState: vscode.TreeItemCollapsibleState.Collapsed,
     };
   }
