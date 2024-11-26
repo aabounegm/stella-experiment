@@ -23,6 +23,11 @@ export function activate(context: vscode.ExtensionContext): void {
   vscode.workspace.onDidChangeTextDocument(() => {
     vscode.window.activeTextEditor?.setDecorations(highlightDecorationType, []);
   });
+  vscode.workspace.onDidSaveTextDocument(() => {
+    if (vscode.window.activeTextEditor?.document.languageId === "stella") {
+      treeProvider.refresh();
+    }
+  });
   vscode.commands.registerCommand(
     "stella.highlightRegion",
     (ranges: vscode.Range | vscode.Range[]) => {
