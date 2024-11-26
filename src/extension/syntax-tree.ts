@@ -9,7 +9,11 @@ type Node = Required<Pick<AstNodeWithTextRegion, "$type" | "$textRegion">> & {
 /** The types allowed in a terminal rule's returns type */
 type LangiumPrimitive = string | number | boolean | bigint | Date;
 type LangiumValue = LangiumPrimitive | LangiumPrimitive[];
-type NodeProperty = { key: string; value: LangiumValue | Node };
+type NodeProperty = {
+  key: string;
+  value: LangiumValue | Node;
+  ranges: vscode.Range | vscode.Range[];
+};
 
 type Element = Node | NodeProperty | LangiumValue;
 
@@ -74,7 +78,15 @@ export class SyntaxTreeProvider implements vscode.TreeDataProvider<Element> {
       return Object.entries<Node | LangiumValue>(element)
         .filter(([key, _]) => !key.startsWith("$"))
         .map(([key, value]) => {
-          return { key, value };
+          return {
+            key,
+            value,
+            // If the value is an array, `assignments[key]` will contain the ranges of each element
+            ranges:
+              element.$textRegion.assignments?.[key]?.map(
+                (segment) => segment.range as vscode.Range
+              ) ?? [],
+          };
         });
     }
     if (isNodeProperty(element)) {
@@ -102,6 +114,11 @@ export class SyntaxTreeProvider implements vscode.TreeDataProvider<Element> {
         iconPath: new vscode.ThemeIcon(
           typeIcons[typeof element] ?? "symbol-property"
         ),
+        command: {
+          command: "stella.highlightRegion",
+          title: "Highlight Region",
+          arguments: [[]],
+        },
       };
     }
     if (isNode(element)) {
@@ -110,6 +127,11 @@ export class SyntaxTreeProvider implements vscode.TreeDataProvider<Element> {
         label: element.$type,
         description: isEmpty ? "= {}" : undefined,
         iconPath: new vscode.ThemeIcon("symbol-struct"),
+        command: {
+          command: "stella.highlightRegion",
+          title: "Highlight Region",
+          arguments: [element.$textRegion.range],
+        },
         collapsibleState: isEmpty
           ? vscode.TreeItemCollapsibleState.None
           : vscode.TreeItemCollapsibleState.Collapsed,
@@ -120,7 +142,7 @@ export class SyntaxTreeProvider implements vscode.TreeDataProvider<Element> {
       return { label: "Error!" };
     }
 
-    const { key, value } = element;
+    const { key, value, ranges } = element;
     if (isLangiumPrimitive(value)) {
       return {
         label: key,
@@ -128,6 +150,11 @@ export class SyntaxTreeProvider implements vscode.TreeDataProvider<Element> {
         iconPath: new vscode.ThemeIcon(
           typeIcons[typeof value] ?? "symbol-property"
         ),
+        command: {
+          command: "stella.highlightRegion",
+          title: "Highlight Region",
+          arguments: [ranges],
+        },
       };
     }
     if (Array.isArray(value)) {
@@ -136,6 +163,11 @@ export class SyntaxTreeProvider implements vscode.TreeDataProvider<Element> {
         label: key,
         description: isEmpty ? "= []" : undefined,
         iconPath: new vscode.ThemeIcon("symbol-array"),
+        command: {
+          command: "stella.highlightRegion",
+          title: "Highlight Region",
+          arguments: [ranges],
+        },
         collapsibleState: isEmpty
           ? vscode.TreeItemCollapsibleState.None
           : vscode.TreeItemCollapsibleState.Collapsed,
@@ -146,6 +178,11 @@ export class SyntaxTreeProvider implements vscode.TreeDataProvider<Element> {
       return {
         label: key,
         iconPath: new vscode.ThemeIcon("symbol-reference"),
+        command: {
+          command: "stella.highlightRegion",
+          title: "Highlight Region",
+          arguments: [ranges],
+        },
         description: `Ref<${value.$refText}>`,
       };
     }
@@ -153,7 +190,19 @@ export class SyntaxTreeProvider implements vscode.TreeDataProvider<Element> {
     return {
       label: key,
       iconPath: new vscode.ThemeIcon("symbol-property"),
+      command: {
+        command: "stella.highlightRegion",
+        title: "Highlight Region",
+        arguments: [value.$textRegion.range],
+      },
       collapsibleState: vscode.TreeItemCollapsibleState.Collapsed,
     };
   }
 }
+
+export const highlightDecorationType =
+  vscode.window.createTextEditorDecorationType({
+    border: "1px solid rgb(255, 128, 0)",
+    borderRadius: "4px",
+    backgroundColor: "rgba(255, 128, 0, 0.2)",
+  });

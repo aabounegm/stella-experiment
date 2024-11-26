@@ -5,7 +5,7 @@ import type {
 import * as vscode from "vscode";
 import * as path from "node:path";
 import { LanguageClient, TransportKind } from "vscode-languageclient/node.js";
-import { SyntaxTreeProvider } from "./syntax-tree.js";
+import { highlightDecorationType, SyntaxTreeProvider } from "./syntax-tree.js";
 
 let client: LanguageClient;
 
@@ -20,6 +20,18 @@ export function activate(context: vscode.ExtensionContext): void {
       treeProvider.refresh();
     }
   });
+  vscode.workspace.onDidChangeTextDocument(() => {
+    vscode.window.activeTextEditor?.setDecorations(highlightDecorationType, []);
+  });
+  vscode.commands.registerCommand(
+    "stella.highlightRegion",
+    (ranges: vscode.Range | vscode.Range[]) => {
+      vscode.window.activeTextEditor?.setDecorations(
+        highlightDecorationType,
+        Array.isArray(ranges) ? ranges : [ranges]
+      );
+    }
+  );
   vscode.commands.registerCommand("stella.refreshSyntaxTree", () => {
     treeProvider.refresh();
   });
