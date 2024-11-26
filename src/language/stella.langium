@@ -206,7 +206,15 @@ Multiply infers Expr:
 ;
 
 Divide infers Expr:
-    TypeApplication ({infer Divide.left=current} '/' right=TypeApplication)*
+    DotSomething ({infer Divide.left=current} '/' right=DotSomething)*
+;
+
+DotSomething infers Expr:
+    TypeApplication (
+        '.'
+            ({infer DotRecord.expr=current} label=ID
+            | {infer DotTuple.expr=current} index=INT)
+    )*
 ;
 
 TypeApplication infers Expr:
@@ -214,16 +222,9 @@ TypeApplication infers Expr:
 ;
 
 Application infers Expr:
-    DotSomething ({infer Application.fun=current} '(' (args+=Expr (',' args+=Expr)*)? ')')*
+    Primary ({infer Application.fun=current} '(' (args+=Expr (',' args+=Expr)*)? ')')*
 ;
 
-DotSomething infers Expr:
-    Primary (
-        '.'
-            ({infer DotRecord.expr=current} label=ID
-            | {infer DotTuple.expr=current} index=INT)
-    )*
-;
 
 /** Non-left-recursive expressions */
 Primary infers Expr:
