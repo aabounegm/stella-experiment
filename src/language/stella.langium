@@ -45,8 +45,12 @@ DeclFun:
     (annotations+=Annotation)* 'fn' name=ID FuncParamsAndBody
 ;
 
+GenericTypeVar:
+    name=ID
+;
+
 DeclFunGeneric:
-    (annotations+=Annotation)* 'generic' 'fn' name=ID '[' generics+=ID (',' generics+=ID)* ']' FuncParamsAndBody
+    (annotations+=Annotation)* 'generic' 'fn' name=ID '[' generics+=GenericTypeVar (',' generics+=GenericTypeVar)* ']' FuncParamsAndBody
 ;
 
 DeclTypeAlias:
@@ -140,7 +144,7 @@ Let:
 LetRec:
     'letrec' patternBindings+=PatternBinding (',' patternBindings+=PatternBinding)* 'in' body=Expr;
 TypeAbstraction:
-    'generic' '[' generics+=ID (',' generics+=ID)* ']' expr=Expr;
+    'generic' '[' generics+=GenericTypeVar (',' generics+=GenericTypeVar)* ']' expr=Expr;
 ParenthesisedExpr:
     '(' expr=Expr ')';
 
@@ -342,6 +346,8 @@ LabelledPattern:
 
 // Types
 
+type TypeDecl = GenericTypeVar | DeclTypeAlias | TypeRec;
+
 Type:
     TypeSum
 ;
@@ -359,9 +365,9 @@ TypeRef:
 TypeFun:
     'fn' '(' (paramTypes+=Type (',' paramTypes+=Type)*)? ')' '->' returnType=Type;
 TypeForAll:
-    'forall' (types+=ID)* '.' type=Type;
+    'forall' (types+=GenericTypeVar)* '.' type=Type;
 TypeRec:
-    'µ' var=ID '.' type=Type;
+    'µ' name=ID '.' type=Type;
 TypeTuple:
     '{' (types+=Type (',' types+=Type)*)? '}';
 TypeRecord:
@@ -383,7 +389,7 @@ TypeBottom:
 TypeAuto:
     {infer TypeAuto} 'auto';
 TypeVar:
-    name=ID;
+    ref=[TypeDecl];
 TypeParens:
     '(' type=Type ')';
 
