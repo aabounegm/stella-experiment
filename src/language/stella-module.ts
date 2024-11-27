@@ -15,6 +15,7 @@ import {
   StellaValidator,
   registerValidationChecks,
 } from "./stella-validator.js";
+import { SemanticTokenProvider } from "./lsp/semantic-tokens.js";
 import { StellaScopeProvider } from "./references/scope-provider.js";
 
 /**
@@ -43,6 +44,9 @@ export const StellaModule: Module<
 > = {
   validation: {
     StellaValidator: () => new StellaValidator(),
+  },
+  lsp: {
+    SemanticTokenProvider: (services) => new SemanticTokenProvider(services),
   },
   references: {
     ScopeProvider: (services) => new StellaScopeProvider(services),
