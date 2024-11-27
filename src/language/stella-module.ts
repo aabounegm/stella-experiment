@@ -15,6 +15,7 @@ import {
   StellaValidator,
   registerValidationChecks,
 } from "./stella-validator.js";
+import { StellaScopeProvider } from "./references/scope-provider.js";
 
 /**
  * Declaration of custom services - add your own service classes here.
@@ -42,6 +43,9 @@ export const StellaModule: Module<
 > = {
   validation: {
     StellaValidator: () => new StellaValidator(),
+  },
+  references: {
+    ScopeProvider: (services) => new StellaScopeProvider(services),
   },
 };
 

@@ -45,8 +45,12 @@ DeclFun:
     (annotations+=Annotation)* 'fn' name=ID FuncParamsAndBody
 ;
 
+GenericTypeVar:
+    name=ID
+;
+
 DeclFunGeneric:
-    (annotations+=Annotation)* 'generic' 'fn' name=ID '[' generics+=ID (',' generics+=ID)* ']' FuncParamsAndBody
+    (annotations+=Annotation)* 'generic' 'fn' name=ID '[' generics+=GenericTypeVar (',' generics+=GenericTypeVar)* ']' FuncParamsAndBody
 ;
 
 DeclTypeAlias:
@@ -61,6 +65,8 @@ DeclExceptionVariant:
 
 // Expressions
 
+type DeclValue = ParamDecl | DeclFun | DeclFunGeneric | PatternVar;
+
 ConstTrue:
     {infer ConstTrue} 'true';
 ConstFalse:
@@ -72,15 +78,15 @@ ConstInt:
 ConstMemory:
     mem=MEMORY_ADDRESS;
 Var:
-    name=ID;
+    ref=[DeclValue];
 Panic:
     {infer Panic} 'panic!';
 Throw:
     'throw' '(' expr=Expr ')';
 TryCatch:
-    'try' '{' tryExpr=Expr '}' 'catch' '{' pat=Pattern '=>' fallbackExpr=Expr '}';
+    'try' '{' tryExpr=Expr '}' 'catch' '{' pattern=Pattern '=>' fallbackExpr=Expr '}';
 TryCastAs:
-    'try' '{' tryExpr=Expr '}' 'cast' 'as' type=Type '{' pat=Pattern '=>' expr=Expr '}' 'with' '{' fallbackExpr=Expr '}';
+    'try' '{' tryExpr=Expr '}' 'cast' 'as' type=Type '{' pattern=Pattern '=>' expr=Expr '}' 'with' '{' fallbackExpr=Expr '}';
 TryWith:
     'try' '{' tryExpr=Expr '}' 'with' '{' fallbackExpr=Expr '}';
 Inl:
@@ -138,7 +144,7 @@ Let:
 LetRec:
     'letrec' patternBindings+=PatternBinding (',' patternBindings+=PatternBinding)* 'in' body=Expr;
 TypeAbstraction:
-    'generic' '[' generics+=ID (',' generics+=ID)* ']' expr=Expr;
+    'generic' '[' generics+=GenericTypeVar (',' generics+=GenericTypeVar)* ']' expr=Expr;
 ParenthesisedExpr:
     '(' expr=Expr ')';
 
@@ -340,6 +346,8 @@ LabelledPattern:
 
 // Types
 
+type TypeDecl = GenericTypeVar | DeclTypeAlias | TypeRec;
+
 Type:
     TypeSum
 ;
@@ -357,9 +365,9 @@ TypeRef:
 TypeFun:
     'fn' '(' (paramTypes+=Type (',' paramTypes+=Type)*)? ')' '->' returnType=Type;
 TypeForAll:
-    'forall' (types+=ID)* '.' type=Type;
+    'forall' (types+=GenericTypeVar)* '.' type=Type;
 TypeRec:
-    'µ' var=ID '.' type=Type;
+    'µ' name=ID '.' type=Type;
 TypeTuple:
     '{' (types+=Type (',' types+=Type)*)? '}';
 TypeRecord:
@@ -381,7 +389,7 @@ TypeBottom:
 TypeAuto:
     {infer TypeAuto} 'auto';
 TypeVar:
-    name=ID;
+    ref=[TypeDecl];
 TypeParens:
     '(' type=Type ')';
 
