@@ -61,6 +61,8 @@ DeclExceptionVariant:
 
 // Expressions
 
+type DeclValue = ParamDecl | DeclFun | DeclFunGeneric | PatternVar;
+
 ConstTrue:
     {infer ConstTrue} 'true';
 ConstFalse:
@@ -72,15 +74,15 @@ ConstInt:
 ConstMemory:
     mem=MEMORY_ADDRESS;
 Var:
-    name=ID;
+    ref=[DeclValue];
 Panic:
     {infer Panic} 'panic!';
 Throw:
     'throw' '(' expr=Expr ')';
 TryCatch:
-    'try' '{' tryExpr=Expr '}' 'catch' '{' pat=Pattern '=>' fallbackExpr=Expr '}';
+    'try' '{' tryExpr=Expr '}' 'catch' '{' pattern=Pattern '=>' fallbackExpr=Expr '}';
 TryCastAs:
-    'try' '{' tryExpr=Expr '}' 'cast' 'as' type=Type '{' pat=Pattern '=>' expr=Expr '}' 'with' '{' fallbackExpr=Expr '}';
+    'try' '{' tryExpr=Expr '}' 'cast' 'as' type=Type '{' pattern=Pattern '=>' expr=Expr '}' 'with' '{' fallbackExpr=Expr '}';
 TryWith:
     'try' '{' tryExpr=Expr '}' 'with' '{' fallbackExpr=Expr '}';
 Inl:
