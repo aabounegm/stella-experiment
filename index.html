@@ -4,19 +4,30 @@
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Langium Web</title>
-    <link href="./static/styles.css" rel="stylesheet"/>
+    <title>Stella Playground</title>
+    <link href="./static/styles.css" rel="stylesheet" />
+    <script defer src="https://fizruk.github.io/stella/playground/stella.js"></script>
 </head>
 
 <body>
-    <div style="padding: 5px">
-        <h1>Stella in Langium</h1>
-        Please select which grammar definition you want to use with monaco-editor:
-        <br>
-        <a href="./static/monacoClassic.html">Stella + Monarch (Classic monaco-editor config)</a>
-        <br>
-        <a href="./static/monacoExtended.html">Stella + Textmate (Extended Vscode Extension Config)</a>
+    <header id="header">
+        <h1 style="font-size: 1.5em;">Stella Playground</h1>
+        <ul class="links">
+            <li><a href="https://fizruk.github.io/stella">Docs</a></li>
+        </ul>
+    </header>
+    <div id="wrapper">
+        <div id="monaco-editor-root"></div>
+        <div id="actions">
+            <div>
+                <button id="typecheck">Typecheck</button>
+                <button id="compile">Compile</button>
+            </div>
+            <div id="result">Loading...</div>
+        </div>
     </div>
+
+    <script defer type="module" src="./src/web/main.ts"></script>
 </body>
 
 </html>
