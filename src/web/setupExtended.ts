@@ -2,7 +2,6 @@ import {
   MonacoEditorLanguageClientWrapper,
   UserConfig,
 } from "monaco-editor-wrapper";
-import { KeyMod, KeyCode } from "monaco-editor";
 import { code, configureWorker, defineUserServices } from "./setupCommon.js";
 
 export const setupConfigExtended = (): UserConfig => {
@@ -69,8 +68,5 @@ export const executeExtended = async (htmlElement: HTMLElement) => {
   const userConfig = setupConfigExtended();
   const wrapper = new MonacoEditorLanguageClientWrapper();
   await wrapper.initAndStart(userConfig, htmlElement);
-
-  wrapper.getEditor()?.addCommand(KeyMod.CtrlCmd + KeyCode.Enter, () => {
-    console.log("CTRL+Enter pressed");
-  });
+  return wrapper;
 };

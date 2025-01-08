@@ -6,6 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Stella Playground</title>
     <link href="./static/styles.css" rel="stylesheet" />
+    <script defer src="https://fizruk.github.io/stella/playground/stella.js"></script>
 </head>
 
 <body>
@@ -15,20 +16,16 @@
             <li><a href="https://fizruk.github.io/stella">Docs</a></li>
         </ul>
     </header>
-    <div class="wrapper">
-        <!-- Monaco Root -->
+    <div id="wrapper">
         <div id="monaco-editor-root"></div>
+        <div id="actions">
+            <div>
+                <button id="typecheck">Typecheck</button>
+                <button id="compile">Compile</button>
+            </div>
+            <div id="result">Loading...</div>
+        </div>
     </div>
-    <!-- Monaco Configuration -->
-    <script type="module">
-        // vite is used to resolve the included TypeScript files
-        import { configureMonacoWorkers } from './src/web/setupCommon';
-        import { executeExtended } from './src/web/setupExtended';
-
-        configureMonacoWorkers();
-        // keep a reference to a promise for when the editor is finished starting, we'll use this to setup the canvas on load
-        const startingPromise = executeExtended(document.getElementById('monaco-editor-root'));
-    </script>
 
     <script type="module" src="./src/web/main.ts"></script>
 </body>
