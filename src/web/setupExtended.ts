@@ -2,17 +2,18 @@ import {
   MonacoEditorLanguageClientWrapper,
   UserConfig,
 } from "monaco-editor-wrapper";
+import { KeyMod, KeyCode } from "monaco-editor";
 import { code, configureWorker, defineUserServices } from "./setupCommon.js";
 
 export const setupConfigExtended = (): UserConfig => {
   const extensionFilesOrContents = new Map();
   extensionFilesOrContents.set(
     "/language-configuration.json",
-    new URL("../language-configuration.json", import.meta.url)
+    new URL("../../language-configuration.json", import.meta.url)
   );
   extensionFilesOrContents.set(
     "/stella-grammar.json",
-    new URL("../syntaxes/stella.tmLanguage.json", import.meta.url)
+    new URL("../../syntaxes/stella.tmLanguage.json", import.meta.url)
   );
 
   return {
@@ -68,4 +69,8 @@ export const executeExtended = async (htmlElement: HTMLElement) => {
   const userConfig = setupConfigExtended();
   const wrapper = new MonacoEditorLanguageClientWrapper();
   await wrapper.initAndStart(userConfig, htmlElement);
+
+  wrapper.getEditor()?.addCommand(KeyMod.CtrlCmd + KeyCode.Enter, () => {
+    console.log("CTRL+Enter pressed");
+  });
 };
