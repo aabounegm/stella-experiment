@@ -24,14 +24,14 @@ jobs:
         with:
           node-version: "18"
 
-      - name: Build API docs
+      - name: Build playground
         run: |
           npm ci
           npm run langium:generate
           npm run build
           npm run bundle
 
-      - name: Upload docs artifact
+      - name: Upload playground artifact
         uses: actions/upload-pages-artifact@v3
         with:
           path: dist
