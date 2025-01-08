@@ -19,7 +19,10 @@ import {
   type StellaAstType,
 } from "../generated/ast.js";
 
-const funcKeywords: Partial<Record<keyof StellaAstType, string>> = {
+/** A map from the keyword AST Node to its string representation */
+type StellaBuiltinKeywords = Partial<Record<keyof StellaAstType, string>>;
+
+const builtinFuncs: StellaBuiltinKeywords = {
   Inl: "inl",
   Inr: "inr",
   ConsList: "cons",
@@ -37,6 +40,15 @@ const funcKeywords: Partial<Record<keyof StellaAstType, string>> = {
   Ref: "new",
 };
 
+const builtinTypes: StellaBuiltinKeywords = {
+  TypeNat: "Nat",
+  TypeBool: "Bool",
+  TypeUnit: "Unit",
+  TypeTop: "Top",
+  TypeBottom: "Bot",
+  TypeAuto: "auto",
+};
+
 export class SemanticTokenProvider extends AbstractSemanticTokenProvider {
   protected override highlightElement(
     node: AstNode,
@@ -48,12 +60,19 @@ export class SemanticTokenProvider extends AbstractSemanticTokenProvider {
         property: "extensionNames",
         type: SemanticTokenTypes.macro,
       });
-    } else if (node.$type in funcKeywords) {
+    } else if (node.$type in builtinFuncs) {
       // Built-in functions
       acceptor({
         node,
-        keyword: funcKeywords[node.$type as keyof StellaAstType]!,
+        keyword: builtinFuncs[node.$type as keyof StellaAstType]!,
         type: SemanticTokenTypes.function,
+        modifier: [SemanticTokenModifiers.defaultLibrary],
+      });
+    } else if (node.$type in builtinTypes) {
+      acceptor({
+        node,
+        keyword: builtinTypes[node.$type as keyof StellaAstType]!,
+        type: SemanticTokenTypes.class,
         modifier: [SemanticTokenModifiers.defaultLibrary],
       });
     } else if (isDeclFun(node) || isDeclFunGeneric(node)) {
