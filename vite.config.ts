@@ -5,6 +5,7 @@ export default defineConfig({
   build: {
     target: "esnext",
   },
+  base: "",
   resolve: {
     dedupe: ["vscode"],
   },
