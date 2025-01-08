@@ -2,7 +2,7 @@ import {
   MonacoEditorLanguageClientWrapper,
   UserConfig,
 } from "monaco-editor-wrapper";
-import { configureWorker, defineUserServices } from "./setupCommon.js";
+import { code, configureWorker, defineUserServices } from "./setupCommon.js";
 import monarchSyntax from "./syntaxes/stella.monarch.js";
 
 export const setupConfigClassic = (): UserConfig => {
@@ -12,7 +12,7 @@ export const setupConfigClassic = (): UserConfig => {
       editorAppConfig: {
         $type: "classic",
         languageId: "stella",
-        code: `// Stella is running in the web!`,
+        code,
         useDiffEditor: false,
         languageExtensionConfig: { id: "langium" },
         languageDef: monarchSyntax,

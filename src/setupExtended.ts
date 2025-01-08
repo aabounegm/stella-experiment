@@ -2,7 +2,7 @@ import {
   MonacoEditorLanguageClientWrapper,
   UserConfig,
 } from "monaco-editor-wrapper";
-import { configureWorker, defineUserServices } from "./setupCommon.js";
+import { code, configureWorker, defineUserServices } from "./setupCommon.js";
 
 export const setupConfigExtended = (): UserConfig => {
   const extensionFilesOrContents = new Map();
@@ -21,7 +21,7 @@ export const setupConfigExtended = (): UserConfig => {
       editorAppConfig: {
         $type: "extended",
         languageId: "stella",
-        code: `// Stella is running in the web!`,
+        code,
         useDiffEditor: false,
         extensions: [
           {
