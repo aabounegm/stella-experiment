@@ -1,12 +1,30 @@
-html,body {
-    background: rgb(33,33,33);
-    font-family: 'Lucida Sans', 'Lucida Sans Regular', 'Lucida Grande', 'Lucida Sans Unicode', Geneva, Verdana, sans-serif;
-    color: white;
-    margin: 0;
+html,
+body {
+  background: rgb(33, 33, 33);
+  font-family: "Lucida Sans", "Lucida Sans Regular", "Lucida Grande",
+    "Lucida Sans Unicode", Geneva, Verdana, sans-serif;
+  color: white;
+  margin: 0;
 }
-/* for monaco */
+#header {
+  display: flex; /* Should be hidden in JS if inside iframe */
+  justify-content: space-between;
+  align-items: center;
+  padding: 0 10px;
+  border-bottom: 1px solid #ff0;
+  margin-bottom: 12px;
+}
+.links {
+  display: flex;
+  gap: 28px;
+  list-style: none;
+}
+.links a {
+  color: white;
+  text-decoration: none;
+}
 .wrapper {
 }
 #monaco-editor-root {
-    height: 100vh;
+  height: 100vh;
 }

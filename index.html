@@ -9,6 +9,12 @@
 </head>
 
 <body>
+    <header id="header">
+        <h1 style="font-size: 1.5em;">Stella Playground</h1>
+        <ul class="links">
+            <li><a href="https://fizruk.github.io/stella">Docs</a></li>
+        </ul>
+    </header>
     <div class="wrapper">
         <!-- Monaco Root -->
         <div id="monaco-editor-root"></div>
@@ -23,6 +29,8 @@
         // keep a reference to a promise for when the editor is finished starting, we'll use this to setup the canvas on load
         const startingPromise = executeExtended(document.getElementById('monaco-editor-root'));
     </script>
+
+    <script type="module" src="./src/web/main.ts"></script>
 </body>
 
 </html>
