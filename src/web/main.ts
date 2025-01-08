@@ -2,13 +2,11 @@ import { hideHeaderInIframe } from "./iframe.js";
 import * as stella from "./compiler.js";
 
 import { executeExtended } from "./setupExtended.js";
-import { configureMonacoWorkers } from "./setupCommon.js";
 import { KeyMod, KeyCode } from "monaco-editor";
 
 hideHeaderInIframe();
 
 // Initialize the Monaco editor
-configureMonacoWorkers();
 const monacoRoot = document.getElementById("monaco-editor-root")!;
 const monacoWrapper = await executeExtended(monacoRoot);
 
