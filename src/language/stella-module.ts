@@ -1,6 +1,5 @@
-import { type Module, inject } from "langium";
+import { Module, createDefaultCoreModule, inject } from "langium";
 import {
-  createDefaultModule,
   createDefaultSharedModule,
   type DefaultSharedModuleContext,
   type LangiumServices,
@@ -16,6 +15,12 @@ import {
   registerValidationChecks,
 } from "./stella-validator.js";
 import { StellaScopeProvider } from "./references/scope-provider.js";
+import {
+  createLangiumModuleForTypirBinding,
+  initializeLangiumTypirServices,
+  LangiumServicesForTypirBinding,
+} from "typir-langium";
+import { createStellaTypirModule } from "./type-system/stella-type-checker.js";
 
 /**
  * Declaration of custom services - add your own service classes here.
@@ -24,6 +29,7 @@ export type StellaAddedServices = {
   validation: {
     StellaValidator: StellaValidator;
   };
+  typir: LangiumServicesForTypirBinding;
 };
 
 /**
@@ -37,17 +43,26 @@ export type StellaServices = LangiumServices & StellaAddedServices;
  * declared custom services. The Langium defaults can be partially specified to override only
  * selected services, while the custom services must be fully specified.
  */
-export const StellaModule: Module<
-  StellaServices,
-  PartialLangiumServices & StellaAddedServices
-> = {
-  validation: {
-    StellaValidator: () => new StellaValidator(),
-  },
-  references: {
-    ScopeProvider: (services) => new StellaScopeProvider(services),
-  },
-};
+export function createStellaModule(
+  shared: LangiumSharedServices
+): Module<StellaServices, PartialLangiumServices & StellaAddedServices> {
+  return {
+    validation: {
+      StellaValidator: () => new StellaValidator(),
+    },
+    // For type checking with Typir, inject and merge these modules:
+    typir: () =>
+      inject(
+        Module.merge(
+          createLangiumModuleForTypirBinding(shared), // the Typir default services
+          createStellaTypirModule(shared) // custom Typir services for LOX
+        )
+      ),
+    references: {
+      ScopeProvider: (services) => new StellaScopeProvider(services),
+    },
+  };
+}
 
 /**
  * Create the full set of services required by Langium.
@@ -73,12 +88,13 @@ export function createStellaServices(context: DefaultSharedModuleContext): {
     StellaGeneratedSharedModule
   );
   const Stella = inject(
-    createDefaultModule({ shared }),
+    createDefaultCoreModule({ shared }),
     StellaGeneratedModule,
-    StellaModule
+    createStellaModule(shared)
   );
   shared.ServiceRegistry.register(Stella);
   registerValidationChecks(Stella);
+  initializeLangiumTypirServices(Stella, Stella.typir);
   if (!context.connection) {
     // We don't run inside a language server
     // Therefore, initialize the configuration provider instantly
