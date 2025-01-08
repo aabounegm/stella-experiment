@@ -21,8 +21,9 @@ async function main() {
     resultElement.innerText = "Typechecking...";
 
     const code = monacoWrapper.getEditor()?.getValue() ?? "";
-    const { result, status } = stella.typecheck(code);
+    const { result, status: _ } = stella.typecheck(code);
 
+    // TODO: use status to color the result
     resultElement.innerText = result;
   }
 
@@ -30,8 +31,9 @@ async function main() {
     resultElement.innerText = "Compiling...";
 
     const code = monacoWrapper.getEditor()?.getValue() ?? "";
-    const { result, status } = stella.compile(code);
+    const { result, status: _ } = stella.compile(code);
 
+    // TODO: use status to color the result
     resultElement.innerText = result;
   }
 
