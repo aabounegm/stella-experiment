@@ -2,15 +2,44 @@ import type {
   LanguageClientOptions,
   ServerOptions,
 } from "vscode-languageclient/node.js";
-import type * as vscode from "vscode";
+import * as vscode from "vscode";
 import * as path from "node:path";
 import { LanguageClient, TransportKind } from "vscode-languageclient/node.js";
+import { highlightDecorationType, SyntaxTreeProvider } from "./syntax-tree.js";
 
 let client: LanguageClient;
 
 // This function is called when the extension is activated.
 export function activate(context: vscode.ExtensionContext): void {
   client = startLanguageClient(context);
+
+  const treeProvider = new SyntaxTreeProvider(client);
+  vscode.window.registerTreeDataProvider("syntaxTree", treeProvider);
+  vscode.window.onDidChangeActiveTextEditor((editor) => {
+    if (editor?.document.languageId === "stella") {
+      treeProvider.refresh();
+    }
+  });
+  vscode.workspace.onDidChangeTextDocument(() => {
+    vscode.window.activeTextEditor?.setDecorations(highlightDecorationType, []);
+  });
+  vscode.workspace.onDidSaveTextDocument(() => {
+    if (vscode.window.activeTextEditor?.document.languageId === "stella") {
+      treeProvider.refresh();
+    }
+  });
+  vscode.commands.registerCommand(
+    "stella.highlightRegion",
+    (ranges: vscode.Range | vscode.Range[]) => {
+      vscode.window.activeTextEditor?.setDecorations(
+        highlightDecorationType,
+        Array.isArray(ranges) ? ranges : [ranges]
+      );
+    }
+  );
+  vscode.commands.registerCommand("stella.refreshSyntaxTree", () => {
+    treeProvider.refresh();
+  });
 }
 
 // This function is called when the extension is deactivated.
