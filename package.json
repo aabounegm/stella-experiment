@@ -5,6 +5,8 @@
   "files": [
     "bin",
     "out",
+    "images",
+    "snippets",
     "src"
   ],
   "type": "module",
