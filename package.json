@@ -1,7 +1,11 @@
 {
-  "name": "stella",
-  "description": "Please enter a brief description here",
-  "version": "0.0.1",
+  "name": "stella-language-server",
+  "version": "0.1.0",
+  "description": "Syntax highlighting for Stella, an educational statically typed programming language",
+  "publisher": "NikolaiKudasovfizruk",
+  "repository": "https://github.com/aabounegm/stella-experiment.git",
+  "icon": "images/stella.png",
+  "displayName": "Stella",
   "files": [
     "bin",
     "out",
@@ -58,7 +62,6 @@
     "node": "18.19.1",
     "npm": "10.2.4"
   },
-  "displayName": "stella",
   "engines": {
     "vscode": "^1.67.0",
     "node": ">=18.0.0"
@@ -111,6 +114,10 @@
         "extensions": [
           ".stella"
         ],
+        "icon": {
+          "light": "./images/stella.png",
+          "dark": "./images/stella.png"
+        },
         "configuration": "./language-configuration.json"
       }
     ],
