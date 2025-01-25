@@ -1,4 +1,6 @@
 # Inspired by https://github.com/SnakeskinTpl/language-tools/blob/main/.github/workflows/publish-on-release.yaml
+name: Publish extension on GitHub Release
+
 on:
   release:
     types:
