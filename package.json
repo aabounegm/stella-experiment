@@ -1,10 +1,16 @@
 {
-  "name": "stella",
-  "description": "Please enter a brief description here",
-  "version": "0.0.1",
+  "name": "stella-language-server",
+  "version": "0.1.0",
+  "description": "Syntax highlighting for Stella, an educational statically typed programming language",
+  "publisher": "NikolaiKudasovfizruk",
+  "repository": "https://github.com/aabounegm/stella-experiment.git",
+  "icon": "images/stella.png",
+  "displayName": "Stella",
   "files": [
     "bin",
     "out",
+    "images",
+    "snippets",
     "src"
   ],
   "type": "module",
@@ -34,10 +40,10 @@
     "@codingame/monaco-vscode-keybindings-service-override": "~11.1.2",
     "monaco-editor": "npm:@codingame/monaco-vscode-editor-api@~11.1.2",
     "monaco-editor-wrapper": "~6.0.0",
-    "monaco-languageclient": "~9.0.0",
-    "vscode": "npm:@codingame/monaco-vscode-api@~11.1.2"
+    "monaco-languageclient": "~9.0.0"
   },
   "devDependencies": {
+    "vscode": "npm:@codingame/monaco-vscode-api@~11.1.2",
     "@types/node": "^18.0.0",
     "@typescript-eslint/parser": "~7.3.1",
     "@typescript-eslint/eslint-plugin": "~7.3.1",
@@ -56,7 +62,6 @@
     "node": "18.19.1",
     "npm": "10.2.4"
   },
-  "displayName": "stella",
   "engines": {
     "vscode": "^1.67.0",
     "node": ">=18.0.0"
@@ -109,7 +114,17 @@
         "extensions": [
           ".stella"
         ],
+        "icon": {
+          "light": "./images/stella.png",
+          "dark": "./images/stella.png"
+        },
         "configuration": "./language-configuration.json"
+      }
+    ],
+    "snippets": [
+      {
+        "language": "stella",
+        "path": "./snippets/snippets.json"
       }
     ],
     "grammars": [
@@ -117,6 +132,16 @@
         "language": "stella",
         "scopeName": "source.stella",
         "path": "syntaxes/stella.tmLanguage.json"
+      },
+      {
+        "injectTo": [
+          "text.html.markdown"
+        ],
+        "scopeName": "source.markdown.stella.codeblock",
+        "path": "./syntaxes/md-injection.tmLanguage.json",
+        "embeddedLanguages": {
+          "meta.embedded.block.stella": "stella"
+        }
       }
     ]
   },
