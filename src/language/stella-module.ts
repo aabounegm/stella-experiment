@@ -18,6 +18,7 @@ import {
 import { SemanticTokenProvider } from "./lsp/semantic-tokens.js";
 import { CompletionProvider } from "./lsp/completion-provider.js";
 import { StellaScopeProvider } from "./references/scope-provider.js";
+import { StellaScopeComputation } from "./references/scope-computation.js";
 
 /**
  * Declaration of custom services - add your own service classes here.
@@ -52,6 +53,7 @@ export const StellaModule: Module<
   },
   references: {
     ScopeProvider: (services) => new StellaScopeProvider(services),
+    ScopeComputation: (services) => new StellaScopeComputation(services),
   },
 };
 

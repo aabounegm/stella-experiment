@@ -4,6 +4,12 @@ All notable changes to the "stella-language-server" extension will be documented
 
 Check [Keep a Changelog](http://keepachangelog.com/) for recommendations on how to structure this file.
 
+## [Unreleased]
+
+### Changed
+
+- Isolated each file as a separate program. Previously, Langium made all symbols in a program visible in other files, but Stella does not support import/export.
+
 ## [v0.1.1]
 
 ### Fixed
@@ -42,6 +48,7 @@ The extension was rewritten from scratch to use [Langium](https://langium.org/) 
 - Initial release
 - Basic syntax highlighting and file icon
 
+[Unreleased]: https://github.com/aabounegm/stella-experiment/compare/v0.1.1...HEAD
 [v0.1.1]: https://github.com/aabounegm/stella-experiment/releases/tag/v0.1.1
 [v0.1.0]: https://github.com/aabounegm/stella-experiment/releases/tag/v0.1.0
 [v0.0.5]: https://github.com/IU-ACCPA-2023/vscode-stella/releases/tag/v0.0.5
