@@ -4,6 +4,12 @@ All notable changes to the "stella-language-server" extension will be documented
 
 Check [Keep a Changelog](http://keepachangelog.com/) for recommendations on how to structure this file.
 
+## [v0.1.1]
+
+### Fixed
+
+- Added syntax highlighting grammar file to `package.json`.
+
 ## [v0.1.0]
 
 The extension was rewritten from scratch to use [Langium](https://langium.org/) and provide a language server that uses LSP.
@@ -36,6 +42,7 @@ The extension was rewritten from scratch to use [Langium](https://langium.org/) 
 - Initial release
 - Basic syntax highlighting and file icon
 
+[v0.1.1]: https://github.com/aabounegm/stella-experiment/releases/tag/v0.1.1
 [v0.1.0]: https://github.com/aabounegm/stella-experiment/releases/tag/v0.1.0
 [v0.0.5]: https://github.com/IU-ACCPA-2023/vscode-stella/releases/tag/v0.0.5
 [v0.0.4]: https://github.com/IU-ACCPA-2023/vscode-stella/releases/tag/v0.0.4
