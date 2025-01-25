@@ -11,6 +11,7 @@
     "out",
     "images",
     "snippets",
+    "syntaxes",
     "src"
   ],
   "type": "module",
