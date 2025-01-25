@@ -112,6 +112,12 @@
         "configuration": "./language-configuration.json"
       }
     ],
+    "snippets": [
+      {
+        "language": "stella",
+        "path": "./snippets/snippets.json"
+      }
+    ],
     "grammars": [
       {
         "language": "stella",
