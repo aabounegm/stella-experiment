@@ -37,6 +37,14 @@ body {
   padding: 20px 32px;
   box-sizing: border-box;
 }
+#main-input {
+  min-width: 25em;
+  height: 1.75em;
+  margin-right: 10px;
+  font-size: 1em;
+  border-radius: 5px;
+  padding: 5px 10px;
+}
 #actions button {
   margin-right: 10px;
   padding: 10px;

@@ -15,7 +15,11 @@ async function main() {
     "typecheck"
   ) as HTMLButtonElement;
   const compileButton = document.getElementById("compile") as HTMLButtonElement;
+  const interpretButton = document.getElementById(
+    "interpret"
+  ) as HTMLButtonElement;
   const resultElement = document.getElementById("result") as HTMLDivElement;
+  const mainInput = document.getElementById("main-input") as HTMLInputElement;
 
   function typecheck() {
     resultElement.innerText = "Typechecking...";
@@ -37,6 +41,23 @@ async function main() {
     resultElement.innerText = result;
   }
 
+  function interpret() {
+    resultElement.innerText = "Evaluating...";
+
+    const code = monacoWrapper.getEditor()?.getValue() ?? "";
+    const input = mainInput.value;
+    const { result, status: _ } = stella.interpret(code, input);
+
+    // TODO: use status to color the result
+    resultElement.innerText = result;
+  }
+
+  mainInput.addEventListener("keydown", (event) => {
+    if (event.key === "Enter") {
+      interpret();
+    }
+  });
+
   // Show correct keybinding based on platform
   const prefix = navigator.platform.includes("Mac") ? "⌘" : "^";
   typecheckButton.innerText = `Typecheck (${prefix} + Enter)`;
@@ -48,6 +69,7 @@ async function main() {
 
   typecheckButton.addEventListener("click", typecheck);
   compileButton.addEventListener("click", compile);
+  interpretButton.addEventListener("click", interpret);
 
   // Initial typecheck
   typecheck();
