@@ -36,10 +36,10 @@
     "@codingame/monaco-vscode-keybindings-service-override": "~11.1.2",
     "monaco-editor": "npm:@codingame/monaco-vscode-editor-api@~11.1.2",
     "monaco-editor-wrapper": "~6.0.0",
-    "monaco-languageclient": "~9.0.0",
-    "vscode": "npm:@codingame/monaco-vscode-api@~11.1.2"
+    "monaco-languageclient": "~9.0.0"
   },
   "devDependencies": {
+    "vscode": "npm:@codingame/monaco-vscode-api@~11.1.2",
     "@types/node": "^18.0.0",
     "@typescript-eslint/parser": "~7.3.1",
     "@typescript-eslint/eslint-plugin": "~7.3.1",
