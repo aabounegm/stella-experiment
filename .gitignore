@@ -10,3 +10,4 @@ src/syntaxes
 !syntaxes/md-injection.tmLanguage.json
 *.tsbuildinfo
 dist/
+*.vsix
