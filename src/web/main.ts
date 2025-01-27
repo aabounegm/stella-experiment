@@ -46,6 +46,12 @@ async function main() {
 
     const code = monacoWrapper.getEditor()?.getValue() ?? "";
     const input = mainInput.value;
+
+    if (input === "") {
+      resultElement.innerText = "No input provided.";
+      return;
+    }
+
     const { result, status: _ } = stella.interpret(code, input);
 
     // TODO: use status to color the result
