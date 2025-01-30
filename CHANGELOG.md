@@ -6,6 +6,10 @@ Check [Keep a Changelog](http://keepachangelog.com/) for recommendations on how 
 
 ## [Unreleased]
 
+### Added
+
+- Validation for unique function names and for the presence of a `main` function.
+
 ### Changed
 
 - Isolated each file as a separate program. Previously, Langium made all symbols in a program visible in other files, but Stella does not support import/export.
