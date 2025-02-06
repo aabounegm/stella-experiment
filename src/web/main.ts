@@ -21,6 +21,9 @@ async function main() {
   const copyCodeButton = document.getElementById(
     "copy-code"
   ) as HTMLButtonElement;
+  const copyOutputButton = document.getElementById(
+    "copy-output"
+  ) as HTMLButtonElement;
   const resultElement = document.getElementById("result") as HTMLDivElement;
   const mainInput = document.getElementById("main-input") as HTMLInputElement;
 
@@ -85,6 +88,13 @@ async function main() {
     setTimeout(() => {
       copyCodeButton.innerText = "📋";
     }, 750);
+  });
+  copyOutputButton.addEventListener("click", () => {
+    navigator.clipboard.writeText(resultElement.innerText.trim());
+    copyOutputButton.innerText = "Output copied ✅";
+    setTimeout(() => {
+      copyOutputButton.innerText = "📋";
+    }, 1500);
   });
 
   // Initial typecheck

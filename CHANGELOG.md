@@ -9,6 +9,7 @@ Check [Keep a Changelog](http://keepachangelog.com/) for recommendations on how 
 ### Added
 
 - Validation for unique function names and for the presence of a `main` function.
+- Add copy code/output buttons to the playground.
 
 ### Changed
 
