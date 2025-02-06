@@ -79,6 +79,19 @@ async function main() {
 
   // Initial typecheck
   typecheck();
+
+  // Confirm dialog on exit if the code has changed
+  const initialVersionId =
+    monacoWrapper.getEditor()?.getModel()?.getAlternativeVersionId() ?? 0;
+
+  window.addEventListener("beforeunload", (event) => {
+    const versionId =
+      monacoWrapper.getEditor()?.getModel()?.getAlternativeVersionId() ?? 0;
+
+    if (versionId > initialVersionId) {
+      event.preventDefault();
+    }
+  });
 }
 
 main();
