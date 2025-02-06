@@ -18,6 +18,9 @@ async function main() {
   const interpretButton = document.getElementById(
     "interpret"
   ) as HTMLButtonElement;
+  const copyCodeButton = document.getElementById(
+    "copy-code"
+  ) as HTMLButtonElement;
   const resultElement = document.getElementById("result") as HTMLDivElement;
   const mainInput = document.getElementById("main-input") as HTMLInputElement;
 
@@ -76,6 +79,13 @@ async function main() {
   typecheckButton.addEventListener("click", typecheck);
   compileButton.addEventListener("click", compile);
   interpretButton.addEventListener("click", interpret);
+  copyCodeButton.addEventListener("click", () => {
+    navigator.clipboard.writeText(monacoWrapper.getEditor()?.getValue() ?? "");
+    copyCodeButton.innerText = "✅";
+    setTimeout(() => {
+      copyCodeButton.innerText = "📋";
+    }, 750);
+  });
 
   // Initial typecheck
   typecheck();
