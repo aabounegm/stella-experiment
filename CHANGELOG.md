@@ -6,6 +6,8 @@ Check [Keep a Changelog](http://keepachangelog.com/) for recommendations on how 
 
 ## [Unreleased]
 
+## [v0.1.2]
+
 ### Added
 
 - Validation for unique function names and for the presence of a `main` function.
@@ -56,7 +58,8 @@ The extension was rewritten from scratch to use [Langium](https://langium.org/) 
 - Initial release
 - Basic syntax highlighting and file icon
 
-[Unreleased]: https://github.com/aabounegm/stella-experiment/compare/v0.1.1...HEAD
+[Unreleased]: https://github.com/aabounegm/stella-experiment/compare/v0.1.2...HEAD
+[v0.1.2]: https://github.com/aabounegm/stella-experiment/releases/tag/v0.1.2
 [v0.1.1]: https://github.com/aabounegm/stella-experiment/releases/tag/v0.1.1
 [v0.1.0]: https://github.com/aabounegm/stella-experiment/releases/tag/v0.1.0
 [v0.0.5]: https://github.com/IU-ACCPA-2023/vscode-stella/releases/tag/v0.0.5
