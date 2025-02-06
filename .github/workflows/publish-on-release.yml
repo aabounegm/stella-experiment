@@ -32,22 +32,16 @@ jobs:
         run: npm run langium:generate
 
       - name: Package the extension 🔧
-        id: packageExtension
-        uses: HaaLeo/publish-vscode-extension@v1
-        with:
-          pat: stub
-          dryRun: true
+        run: vsce package
 
-      - name: Get VSIX name from full path 📦
+      - name: Get VSIX name 📦
         id: vsixName
-        run: echo "name=${VSIX_PATH##*/}" >> "$GITHUB_OUTPUT"
-        env:
-          VSIX_PATH: ${{ steps.packageExtension.outputs.vsixPath }}
+        run: echo "name=$(npm pkg get name | tr -d \")-$(npm pkg get version | tr -d \").vsix" >> "$GITHUB_OUTPUT"
 
       - name: Upload Extension Package as Artifact ⬆️
         uses: actions/upload-artifact@v4
         with:
-          path: ${{ steps.packageExtension.outputs.vsixPath }}
+          path: ${{ steps.vsixName.outputs.name }}
           name: ${{ steps.vsixName.outputs.name }}
           if-no-files-found: error
 
@@ -82,9 +76,13 @@ jobs:
         with:
           name: ${{ needs.build-vsix.outputs.vsixName }}
 
-      - name: Publish to Visual Studio Marketplace
-        uses: HaaLeo/publish-vscode-extension@v1
+      - name: Set up Node 20 📦
+        uses: actions/setup-node@v4
         with:
-          pat: ${{ secrets.VS_MARKETPLACE_TOKEN }}
-          extensionFile: ${{ needs.build-vsix.outputs.vsixName }}
-          registryUrl: https://marketplace.visualstudio.com
+          node-version: "20"
+
+      - name: Install vsce 🧰
+        run: npm install -g @vscode/vsce
+
+      - name: Publish to Visual Studio Marketplace
+        run: vsce publish --packagePath ${{ needs.build-vsix.outputs.vsixName }} --pat ${{ secrets.VS_MARKETPLACE_TOKEN }}
