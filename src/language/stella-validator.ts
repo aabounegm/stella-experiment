@@ -1,11 +1,18 @@
-import { type ValidationAcceptor, type ValidationChecks } from "langium";
+import {
+  GrammarUtils,
+  type ValidationAcceptor,
+  type ValidationChecks,
+} from "langium";
 import type { Range } from "vscode-languageserver";
 import {
   isDeclFun,
+  type Extension,
   type Program,
   type StellaAstType,
 } from "./generated/ast.js";
 import type { StellaServices } from "./stella-module.js";
+import { extensionValues } from "./extensions.js";
+import { DiagnosticCodes } from "./validator/errors.js";
 
 /**
  * Register custom validation checks.
@@ -14,7 +21,12 @@ export function registerValidationChecks(services: StellaServices) {
   const registry = services.validation.ValidationRegistry;
   const validator = services.validation.StellaValidator;
   const checks: ValidationChecks<StellaAstType> = {
-    Program: [validator.checkHasMain, validator.checkUniqueFunctionNames],
+    Program: [
+      validator.checkUniqueExtensions,
+      validator.checkHasMain,
+      validator.checkUniqueFunctionNames,
+    ],
+    Extension: validator.checkValidExtension,
   };
   registry.register(checks, validator);
 }
@@ -28,7 +40,7 @@ export class StellaValidator {
       accept("error", "Missing main function", {
         node: program,
         property: "langDecl", // To not highlight the whole program
-        code: "ERROR_MISSING_MAIN",
+        code: DiagnosticCodes.MISSING_MAIN,
       });
     }
   }
@@ -61,4 +73,66 @@ export class StellaValidator {
       }
     }
   }
+
+  /**
+   * Validates that the extensions used in a program are unique.
+   */
+  checkUniqueExtensions(program: Program, accept: ValidationAcceptor): void {
+    // TODO: make it a Map and store the location of the extension for use in "relatedInformation"
+    const usedExtensions = new Map<string, Range | undefined>();
+
+    for (const extension of program.extensions) {
+      for (let i = 0; i < extension.extensionNames.length; i++) {
+        const extensionName = extension.extensionNames[i];
+        extension.$cstNode?.range;
+
+        if (usedExtensions.has(extensionName)) {
+          const range = usedExtensions.get(extensionName);
+
+          accept("warning", `Extension '${extensionName}' is already in use`, {
+            node: extension,
+            property: "extensionNames",
+            index: i,
+            relatedInformation: range
+              ? [
+                  {
+                    location: {
+                      uri: program.$document!.textDocument.uri,
+                      range,
+                    },
+                    message: "Originally included here",
+                  },
+                ]
+              : [],
+            code: DiagnosticCodes.DUPLICATE_EXTENSION,
+          });
+        } else {
+          const node = GrammarUtils.findNodeForProperty(
+            extension.$cstNode,
+            "extensionNames",
+            i
+          );
+          usedExtensions.set(extensionName, node?.range);
+        }
+      }
+    }
+  }
+
+  /**
+   * Validates that the extensions used are recognized.
+   */
+  checkValidExtension(extension: Extension, accept: ValidationAcceptor): void {
+    extension.extensionNames.forEach((extensionName, i) => {
+      if (!extensionValues.has(extensionName)) {
+        // TODO: check for possible typos and suggest alternatives
+        accept("error", `Unrecognized extension: ${extensionName}`, {
+          node: extension,
+          property: "extensionNames",
+          index: i,
+        });
+      }
+    });
+  }
+
+  // TODO: add all validations from https://github.com/fizruk/stella/blob/main/stella/src/Language/Stella/ExtensionCheck.hs
 }

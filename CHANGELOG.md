@@ -12,6 +12,7 @@ Check [Keep a Changelog](http://keepachangelog.com/) for recommendations on how 
 - Add copy code/output buttons to the playground.
 - Hover provider with link to documentation for extensions.
 - IntelliSense (code completion) support for extensions.
+- Validation and quick fix to remove redundant extensions.
 
 ### Changed
 
