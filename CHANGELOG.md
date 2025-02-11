@@ -6,6 +6,8 @@ Check [Keep a Changelog](http://keepachangelog.com/) for recommendations on how 
 
 ## [Unreleased]
 
+## [v0.1.3]
+
 ### Added
 
 - Support legacy syntax for `cons` patterns that doesn't use the `cons` keyword.
@@ -63,7 +65,8 @@ The extension was rewritten from scratch to use [Langium](https://langium.org/) 
 - Initial release
 - Basic syntax highlighting and file icon
 
-[Unreleased]: https://github.com/aabounegm/stella-experiment/compare/v0.1.2...HEAD
+[Unreleased]: https://github.com/aabounegm/stella-experiment/compare/v0.1.3...HEAD
+[v0.1.3]: https://github.com/aabounegm/stella-experiment/releases/tag/v0.1.3
 [v0.1.2]: https://github.com/aabounegm/stella-experiment/releases/tag/v0.1.2
 [v0.1.1]: https://github.com/aabounegm/stella-experiment/releases/tag/v0.1.1
 [v0.1.0]: https://github.com/aabounegm/stella-experiment/releases/tag/v0.1.0
