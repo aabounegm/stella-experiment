@@ -1,5 +1,8 @@
 export enum DiagnosticCodes {
+  // Error codes used in assignments (from canonical implementation)
   MISSING_MAIN = "ERROR_MISSING_MAIN",
 
-  DUPLICATE_EXTENSION = "ERROR_DUPLICATE_EXTENSION",
+  // Other issues
+  DUPLICATE_EXTENSION = "DUPLICATE_EXTENSION",
+  LEGACY_PATTERN_CONS = "LEGACY_PATTERN_CONS",
 }

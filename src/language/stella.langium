@@ -308,7 +308,8 @@ PatternRecord:
 PatternList:
     '[' (patterns+=Pattern (',' patterns+=Pattern)*)? ']';
 PatternCons:
-    'cons' '(' head=Pattern ',' tail=Pattern ')';
+    // Legacy syntax did not require "cons"
+    usesNewSyntax?='cons'? '(' head=Pattern ',' tail=Pattern ')';
 PatternFalse:
     {infer PatternFalse} 'false';
 PatternTrue:

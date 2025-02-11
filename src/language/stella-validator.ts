@@ -6,6 +6,7 @@ import {
 import type { Range } from "vscode-languageserver";
 import {
   isDeclFun,
+  PatternCons,
   type Extension,
   type Program,
   type StellaAstType,
@@ -27,6 +28,7 @@ export function registerValidationChecks(services: StellaServices) {
       validator.checkUniqueFunctionNames,
     ],
     Extension: validator.checkValidExtension,
+    PatternCons: validator.checkModernPatternConsSyntax,
   };
   registry.register(checks, validator);
 }
@@ -132,6 +134,22 @@ export class StellaValidator {
         });
       }
     });
+  }
+
+  checkModernPatternConsSyntax(
+    patternCons: PatternCons,
+    accept: ValidationAcceptor
+  ): void {
+    if (!patternCons.usesNewSyntax) {
+      accept(
+        "warning",
+        "This syntax is deprecated. Please use 'cons' instead.",
+        {
+          node: patternCons,
+          code: DiagnosticCodes.LEGACY_PATTERN_CONS,
+        }
+      );
+    }
   }
 
   // TODO: add all validations from https://github.com/fizruk/stella/blob/main/stella/src/Language/Stella/ExtensionCheck.hs

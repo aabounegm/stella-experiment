@@ -110,6 +110,30 @@ export class StellaCodeActionProvider implements CodeActionProvider {
     });
   }
 
+  private addConsToPattern(
+    diagnostic: Diagnostic,
+    document: LangiumDocument
+  ): CodeAction | undefined {
+    return {
+      title: 'Add "cons" keyword',
+      kind: CodeActionKind.QuickFix,
+      diagnostics: [diagnostic],
+      edit: {
+        changes: {
+          [document.textDocument.uri]: [
+            {
+              range: {
+                start: diagnostic.range.start,
+                end: diagnostic.range.start,
+              },
+              newText: "cons",
+            },
+          ],
+        },
+      },
+    };
+  }
+
   private createCodeActions(
     diagnostic: Diagnostic,
     document: LangiumDocument
@@ -117,6 +141,8 @@ export class StellaCodeActionProvider implements CodeActionProvider {
     switch (diagnostic.code) {
       case DiagnosticCodes.DUPLICATE_EXTENSION:
         return this.removeRedundantExtension(diagnostic, document);
+      case DiagnosticCodes.LEGACY_PATTERN_CONS:
+        return this.addConsToPattern(diagnostic, document);
     }
     return [];
   }

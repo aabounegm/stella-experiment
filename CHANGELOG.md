@@ -6,6 +6,11 @@ Check [Keep a Changelog](http://keepachangelog.com/) for recommendations on how 
 
 ## [Unreleased]
 
+### Added
+
+- Support legacy syntax for `cons` patterns that doesn't use the `cons` keyword.
+- Warning and quick fix for not using the `cons` keyword in patterns.
+
 ## [v0.1.2]
 
 ### Added
