@@ -32,10 +32,12 @@ export interface StellaSpecifics extends TypirLangiumSpecifics {
   AstTypes: StellaAstType; // all AST types from the generated `ast.ts`
 }
 
+export type TypirStellaServices = TypirLangiumServices<StellaSpecifics>;
+
 export class StellaTypeSystem
   implements LangiumTypeSystemDefinition<StellaSpecifics>
 {
-  onInitialize(typir: TypirLangiumServices<StellaSpecifics>): void {
+  onInitialize(typir: TypirStellaServices): void {
     // Register primitive types
     const typeNat = typir.factory.Primitives.create({
       // The name here doesn't have to correspond to the name in the grammar, what matters is the inference rule
@@ -169,10 +171,7 @@ export class StellaTypeSystem
     });
   }
 
-  onNewAstNode(
-    node: AstNode,
-    typir: TypirLangiumServices<StellaSpecifics>
-  ): void {
+  onNewAstNode(node: AstNode, typir: TypirStellaServices): void {
     if (isDeclFun(node)) {
       typir.factory.Functions.create({
         functionName: node.name,

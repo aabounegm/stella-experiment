@@ -23,11 +23,10 @@ import { StellaCodeActionProvider } from "./lsp/code-action-provider.js";
 import {
   createTypirLangiumServices,
   initializeLangiumTypirServices,
-  TypirLangiumServices,
 } from "typir-langium";
 import {
-  StellaSpecifics,
   StellaTypeSystem,
+  type TypirStellaServices,
 } from "./type-system/stella-type-checker.js";
 import { reflection } from "./generated/ast.js";
 
@@ -38,7 +37,7 @@ export type StellaAddedServices = {
   validation: {
     StellaValidator: StellaValidator;
   };
-  typir: TypirLangiumServices<StellaSpecifics>;
+  typir: TypirStellaServices;
 };
 
 /**
