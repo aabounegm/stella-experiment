@@ -65,8 +65,8 @@ export function createStellaModule(
       CodeActionProvider: (services) => new StellaCodeActionProvider(services),
     },
     // For type checking with Typir, inject and merge these modules:
-    typir: () =>
-      createTypirLangiumServices(shared, reflection, new StellaTypeSystem()),
+    typir: (services) =>
+      createTypirLangiumServices(shared, reflection, new StellaTypeSystem(services)),
     references: {
       ScopeProvider: (services) => new StellaScopeProvider(services),
       ScopeComputation: (services) => new StellaScopeComputation(services),

@@ -27,6 +27,7 @@ import {
   TypeBool,
   ConstUnit,
 } from "../generated/ast.js";
+import { StellaServices } from "../stella-module.js";
 
 export interface StellaSpecifics extends TypirLangiumSpecifics {
   AstTypes: StellaAstType; // all AST types from the generated `ast.ts`
@@ -37,6 +38,8 @@ export type TypirStellaServices = TypirLangiumServices<StellaSpecifics>;
 export class StellaTypeSystem
   implements LangiumTypeSystemDefinition<StellaSpecifics>
 {
+  constructor(private services: StellaServices) {}
+
   onInitialize(typir: TypirStellaServices): void {
     // Register primitive types
     const typeNat = typir.factory.Primitives.create({
@@ -167,6 +170,23 @@ export class StellaTypeSystem
             message: `The return type of function ${node.name} is ${actual.userRepresentation}, but the declared return type is ${expected.userRepresentation}`,
           })
         );
+      },
+      TypeRecord: (node, accept, typir) => {
+        const groups = Object.groupBy(node.fieldTypes, (field) => field.label);
+
+        Object.values(groups).forEach((fields) => {
+          fields?.slice(1).forEach((field) => {
+            accept({
+              languageNode: field,
+              severity: "error",
+              message: "Duplicated field definition",
+              relatedInformation:
+                this.services.validation.StellaValidator.getPreviousDefinitionRelatedInfo(
+                  fields[0]
+                ),
+            });
+          });
+        });
       },
     });
   }
