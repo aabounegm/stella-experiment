@@ -134,6 +134,25 @@ export class StellaCodeActionProvider implements CodeActionProvider {
     };
   }
 
+  private replaceExtensionTypo(
+    diag: Diagnostic,
+    doc: LangiumDocument
+  ): CodeAction[] {
+    if (!Array.isArray(diag.data?.suggestions)) return [];
+
+    const suggestions: string[] = diag.data.suggestions;
+    return suggestions.map((suggestion) => ({
+      title: `Replace with "${suggestion}"`,
+      kind: CodeActionKind.QuickFix,
+      diagnostics: [diag],
+      edit: {
+        changes: {
+          [doc.textDocument.uri]: [{ range: diag.range, newText: suggestion }],
+        },
+      },
+    }));
+  }
+
   private createCodeActions(
     diagnostic: Diagnostic,
     document: LangiumDocument
@@ -143,6 +162,8 @@ export class StellaCodeActionProvider implements CodeActionProvider {
         return this.removeRedundantExtension(diagnostic, document);
       case DiagnosticCodes.LEGACY_PATTERN_CONS:
         return this.addConsToPattern(diagnostic, document);
+      case DiagnosticCodes.UNRECOGNIZED_EXTENSION:
+        return this.replaceExtensionTypo(diagnostic, document);
     }
     return [];
   }

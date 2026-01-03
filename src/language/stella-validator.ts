@@ -23,6 +23,7 @@ import {
 import type { StellaServices } from "./stella-module.js";
 import { extensionValues } from "./extensions.js";
 import { DiagnosticCodes } from "./validator/errors.js";
+import { levenshtein } from "../utils.js";
 
 /**
  * Register custom validation checks.
@@ -115,17 +116,39 @@ export class StellaValidator {
     }
   }
 
+  /** Suggest the closest recognized extension name using Levenshtein distance */
+  private suggestClosestExtensions(name: string): string[] {
+    const candidates = [...extensionValues]
+      .map((candidate) => ({
+        candidate,
+        distance: levenshtein(name, candidate),
+      }))
+      .filter(({ distance }) => distance <= 3)
+      .sort((a, b) => a.distance - b.distance)
+      .slice(0, 3)
+      .map((a) => a.candidate);
+
+    return candidates;
+  }
+
   /**
    * Validates that the extensions used are recognized.
    */
   checkValidExtension(extension: Extension, accept: ValidationAcceptor): void {
     extension.extensionNames.forEach((extensionName, i) => {
       if (!extensionValues.has(extensionName)) {
-        // TODO: check for possible typos and suggest alternatives
-        accept("error", `Unrecognized extension: ${extensionName}`, {
+        const suggestions = this.suggestClosestExtensions(extensionName);
+        let message = `Unrecognized extension: ${extensionName}`;
+        if (suggestions.length > 0) {
+          message += ` (did you mean '${suggestions[0]}'?)`;
+        }
+
+        accept("error", message, {
           node: extension,
           property: "extensionNames",
           index: i,
+          code: DiagnosticCodes.UNRECOGNIZED_EXTENSION,
+          data: { suggestions },
         });
       }
     });
