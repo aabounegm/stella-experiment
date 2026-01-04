@@ -1,19 +1,29 @@
 import {
+  AstNode,
+  CstNode,
   GrammarUtils,
+  isAstNode,
   type ValidationAcceptor,
   type ValidationChecks,
 } from "langium";
-import type { Range } from "vscode-languageserver";
+import type { DiagnosticRelatedInformation } from "vscode-languageserver";
 import {
   isDeclFun,
+  isRecord,
   PatternCons,
+  type Binding,
+  type DeclFun,
   type Extension,
+  type LabelledPattern,
+  type PatternRecord,
   type Program,
+  type Record,
   type StellaAstType,
 } from "./generated/ast.js";
 import type { StellaServices } from "./stella-module.js";
 import { extensionValues } from "./extensions.js";
 import { DiagnosticCodes } from "./validator/errors.js";
+import { levenshtein } from "../utils.js";
 
 /**
  * Register custom validation checks.
@@ -29,6 +39,8 @@ export function registerValidationChecks(services: StellaServices) {
     ],
     Extension: validator.checkValidExtension,
     PatternCons: validator.checkModernPatternConsSyntax,
+    Record: validator.checkDuplicateRecordFields,
+    PatternRecord: validator.checkDuplicateRecordFields,
   };
   registry.register(checks, validator);
 }
@@ -48,29 +60,21 @@ export class StellaValidator {
   }
 
   checkUniqueFunctionNames(program: Program, accept: ValidationAcceptor): void {
-    const usedNames = new Map<string, Range | undefined>();
+    const usedNames = new Map<string, DeclFun>();
 
     for (const decl of program.decls) {
       if (isDeclFun(decl)) {
         if (usedNames.has(decl.name)) {
-          const range = usedNames.get(decl.name);
+          const previousDecl = usedNames.get(decl.name);
+
           accept("error", `Function '${decl.name}' is already defined`, {
             node: decl,
             property: "name",
-            relatedInformation: range
-              ? [
-                  {
-                    location: {
-                      uri: program.$document!.textDocument.uri,
-                      range,
-                    },
-                    message: "Originally defined here",
-                  },
-                ]
-              : [],
+            relatedInformation:
+              this.getPreviousDefinitionRelatedInfo(previousDecl),
           });
         } else {
-          usedNames.set(decl.name, decl.$cstNode?.range);
+          usedNames.set(decl.name, decl);
         }
       }
     }
@@ -80,8 +84,7 @@ export class StellaValidator {
    * Validates that the extensions used in a program are unique.
    */
   checkUniqueExtensions(program: Program, accept: ValidationAcceptor): void {
-    // TODO: make it a Map and store the location of the extension for use in "relatedInformation"
-    const usedExtensions = new Map<string, Range | undefined>();
+    const usedExtensions = new Map<string, CstNode | undefined>();
 
     for (const extension of program.extensions) {
       for (let i = 0; i < extension.extensionNames.length; i++) {
@@ -89,23 +92,16 @@ export class StellaValidator {
         extension.$cstNode?.range;
 
         if (usedExtensions.has(extensionName)) {
-          const range = usedExtensions.get(extensionName);
+          const previousExtension = usedExtensions.get(extensionName);
 
           accept("warning", `Extension '${extensionName}' is already in use`, {
             node: extension,
             property: "extensionNames",
             index: i,
-            relatedInformation: range
-              ? [
-                  {
-                    location: {
-                      uri: program.$document!.textDocument.uri,
-                      range,
-                    },
-                    message: "Originally included here",
-                  },
-                ]
-              : [],
+            relatedInformation: this.getPreviousDefinitionRelatedInfo(
+              previousExtension,
+              "Originally included here"
+            ),
             code: DiagnosticCodes.DUPLICATE_EXTENSION,
           });
         } else {
@@ -114,10 +110,25 @@ export class StellaValidator {
             "extensionNames",
             i
           );
-          usedExtensions.set(extensionName, node?.range);
+          usedExtensions.set(extensionName, node);
         }
       }
     }
+  }
+
+  /** Suggest the closest recognized extension name using Levenshtein distance */
+  private suggestClosestExtensions(name: string): string[] {
+    const candidates = [...extensionValues]
+      .map((candidate) => ({
+        candidate,
+        distance: levenshtein(name, candidate),
+      }))
+      .filter(({ distance }) => distance <= 3)
+      .sort((a, b) => a.distance - b.distance)
+      .slice(0, 3)
+      .map((a) => a.candidate);
+
+    return candidates;
   }
 
   /**
@@ -126,11 +137,18 @@ export class StellaValidator {
   checkValidExtension(extension: Extension, accept: ValidationAcceptor): void {
     extension.extensionNames.forEach((extensionName, i) => {
       if (!extensionValues.has(extensionName)) {
-        // TODO: check for possible typos and suggest alternatives
-        accept("error", `Unrecognized extension: ${extensionName}`, {
+        const suggestions = this.suggestClosestExtensions(extensionName);
+        let message = `Unrecognized extension: ${extensionName}`;
+        if (suggestions.length > 0) {
+          message += ` (did you mean '${suggestions[0]}'?)`;
+        }
+
+        accept("error", message, {
           node: extension,
           property: "extensionNames",
           index: i,
+          code: DiagnosticCodes.UNRECOGNIZED_EXTENSION,
+          data: { suggestions },
         });
       }
     });
@@ -150,6 +168,49 @@ export class StellaValidator {
         }
       );
     }
+  }
+
+  checkDuplicateRecordFields(
+    record: Record | PatternRecord,
+    accept: ValidationAcceptor
+  ): void {
+    const groups: Partial<
+      globalThis.Record<string, Array<Binding | LabelledPattern>>
+    > = isRecord(record)
+      ? Object.groupBy(record.bindings, (binding) => binding.name)
+      : Object.groupBy(record.patterns, (binding) => binding.label);
+
+    Object.values(groups).forEach((bindings) => {
+      bindings?.slice(1).forEach((binding) => {
+        accept("error", "Duplicate field", {
+          node: binding,
+          relatedInformation: this.getPreviousDefinitionRelatedInfo(
+            bindings[0]
+          ),
+        });
+      });
+    });
+  }
+
+  getPreviousDefinitionRelatedInfo(
+    node: AstNode | CstNode | undefined,
+    message = "Previously defined here"
+  ): DiagnosticRelatedInformation[] {
+    if (isAstNode(node)) {
+      node = node.$cstNode;
+    }
+
+    const uri = node?.root?.astNode.$document?.textDocument.uri;
+    const range = node?.range;
+
+    if (!uri || !range) return [];
+
+    return [
+      {
+        message,
+        location: { uri, range },
+      },
+    ];
   }
 
   // TODO: add all validations from https://github.com/fizruk/stella/blob/main/stella/src/Language/Stella/ExtensionCheck.hs
