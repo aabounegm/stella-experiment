@@ -9,5 +9,6 @@ An to provide language support for the [Stella language](https://fizruk.github.i
 - Code snippets
 - Go to definition
 - AST viewer
+- Code extensions validation and suggestions (with quick fixes)
 
 ![AST view](./images/ast-view.png)

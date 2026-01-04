@@ -29,6 +29,7 @@ import {
   type TypirStellaServices,
 } from "./type-system/stella-type-checker.js";
 import { reflection } from "./generated/ast.js";
+import { StellaExtensionValidator, registerExtensionChecks } from "./validator/extensions-validator.js";
 
 /**
  * Declaration of custom services - add your own service classes here.
@@ -36,6 +37,7 @@ import { reflection } from "./generated/ast.js";
 export type StellaAddedServices = {
   validation: {
     StellaValidator: StellaValidator;
+    ExtensionValidator: StellaExtensionValidator;
   };
   typir: TypirStellaServices;
 };
@@ -57,6 +59,7 @@ export function createStellaModule(
   return {
     validation: {
       StellaValidator: () => new StellaValidator(),
+      ExtensionValidator: () => new StellaExtensionValidator(),
     },
     lsp: {
       SemanticTokenProvider: (services) => new SemanticTokenProvider(services),
@@ -104,6 +107,7 @@ export function createStellaServices(context: DefaultSharedModuleContext): {
   );
   shared.ServiceRegistry.register(Stella);
   registerValidationChecks(Stella);
+  registerExtensionChecks(Stella);
   initializeLangiumTypirServices(Stella, Stella.typir);
   if (!context.connection) {
     // We don't run inside a language server
