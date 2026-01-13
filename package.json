@@ -41,8 +41,8 @@
     "monaco-editor": "npm:@codingame/monaco-vscode-editor-api@~11.1.2",
     "monaco-editor-wrapper": "~6.0.0",
     "monaco-languageclient": "~9.0.0",
-    "typir": "^0.3.0",
-    "typir-langium": "^0.3.0",
+    "typir": "^0.3.2",
+    "typir-langium": "^0.3.2",
     "vscode-languageclient": "~9.0.1",
     "vscode-languageserver": "~9.0.1"
   },
